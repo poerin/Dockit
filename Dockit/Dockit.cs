@@ -130,11 +130,12 @@ namespace Dockit
                                 MouseWheelEvent(this, e);
                                 if (shallDock)
                                 {
-                                    return 1;
+                                    return CallNextHookEx(hHook, nCode, wParam, lParam);
                                 }
                                 break;
                             }
-                        case WM_MOUSE.WM_MBUTTONUP:
+                        case WM_MOUSE.WM_MBUTTONDOWN:
+                        case WM_MOUSE.WM_RBUTTONDOWN:
                             {
                                 if (shallDock)
                                 {
@@ -142,6 +143,13 @@ namespace Dockit
                                     canDock = false;
                                     shadow.ClearShadow();
                                 }
+                                enable = false;
+                                break;
+                            }
+                        case WM_MOUSE.WM_MBUTTONUP:
+                        case WM_MOUSE.WM_RBUTTONUP:
+                            {
+                                enable = true;
                                 break;
                             }
                     }
@@ -296,6 +304,7 @@ namespace Dockit
         private static bool canDock = false;
         private static bool shallDock = false;
         private static bool shallSmartDock = false;
+        private static bool enable = true;
         private static Point SmartDockPoint = new Point();
         private static int lastSmartDockWindowIndex = 0;
         private static IntPtr hLastSmartDockWindow;
@@ -607,7 +616,7 @@ namespace Dockit
 
         private static void MouseHook_MouseWheelEvent(object sender, MouseEventArgs e)
         {
-            if (shallDock)
+            if (shallDock && enable)
             {
                 shallSmartDock = true;
                 SmartDockPoint = e.Location;
